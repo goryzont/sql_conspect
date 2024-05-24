@@ -1,0 +1,44 @@
+- Запросы бывают логически сложные
+- Если не получается реализовать запрос сразу и в лоб, попробуйте написать подзапрос,
+решающий часть задачи
+- Бывают запросы, которые без подзапросов реализовать невозможно, либо крайне затруднительно
+- Зачастую, запрос с подзапросом можно переписать так, чтобы избавиться от подзапроса
+(обычно с помощью соединения)
+- Если можно избавиться от подзапроса - надо ли это делать?
+    - не обязательно, зависит от обстоятельств
+    - если запрос с подзапросом так же произволителен как и запрос с соединением, то
+    надо сравнить читабельность
+    - зачастую, планировщик раскрывает запросы с подзапросами в запросы с соединениями
+
+
+Концепция WHERE EXIST:
+SELECT company_name, contact_name
+FROM customers
+WHERE EXISTS (SELECT customer_ID FROM orders
+			  WHERE customer_id = customers.customer_id
+			  AND freight BETWEEN 50 AND 100)
+Оператор EXISTS возвращает true, если подзапрос возвращает одну, или более записей, в противном случае,
+возвращает false
+
+
+Подзапросы с квантификаторами ANY, ALL:
+
+ANY:
+SELECT DISTINCT company_name
+FROM customers
+WHERE customer_id = ANY(
+	SELECT customer_id
+	FROM orders
+	JOIN order_details USING(order_id)
+	WHERE quantity > 40)
+
+ALL:
+SELECT DISTINCT product_name, quantity
+FROM products
+JOIN order_details USING(product_id)
+WHERE quantity > ALL(
+	SELECT AVG(quantity)
+	FROM order_details
+	GROUP BY product_id
+)
+ORDER BY quantity

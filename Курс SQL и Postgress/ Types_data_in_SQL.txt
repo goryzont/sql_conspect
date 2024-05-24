@@ -1,0 +1,39 @@
+ОСНОВНЫЕ ТИПЫ ДАННЫХ
+Integer Numbers(целые числа):
+-smallint (2 bytes, range: -2^16 to 2^16)
+-integer (4 bytes, range: -2^32 to 2^32)
+-bigint (8 bytes, range: -2^64 to 2^64)
+
+(autoincrementing - автоматическое увеличение)
+(типы ниже сами дозаполняются до максимума)
+-smallserial (2 bytes, range: 1 to 2^16)
+-smallserial (4 bytes, range: 1 to 2^32)
+-bigserial (8 bytes, range: 1 to 2^64)
+
+Real Numbers(реальные числа):
+-dtcimal/numeric (variable, range:-3.4 * 10^38 to 3.4 * 10^38)
+-real/float4 (4 bytes, range: 6 знаков после запятой)
+-double precision/float8/float (8 bytes, range: 15 знаков после запятой)
+
+Characters:
+-char - строка фиксированной длины(дозополняется до заданной длины)
+-varchar - так же как и char но не дозополняется и не расширается
+-text - типы поддреживаемый строки любой длины
+
+Logical:
+bool - True or False (1 byte)
+
+Temporal:
+-date - хранит даты( 4 bytes, range 4713 до н.э to 294.276 н.э)
+-time - хранит время(8 bytes, range 00:00:00 to 24:00:00)
+-timestamp - хранит дату и время(8 byte)
+-interval - разница между двумя timestamp (16 bytes)
+-timestamptz -хранит timestamp+timezone(8 bytes)
+
+Также поддерживает такие типы данных:
+-Arrays
+-JSON
+-XML
+-Геометрические типы и др. спец. типы
+-Custom типы
+-NULL - отсуствие данных

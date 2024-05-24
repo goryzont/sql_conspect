@@ -1,0 +1,45 @@
+CREATE table exam(
+	exam_id serial NOT NULL UNIQUE,
+	exam_name varchar,
+	exam_date date
+);
+
+ALTER TABLE exam
+DROP CONSTRAINT exam_exam_id_key;
+
+ALTER TABLE exam
+ADD CONSTRAINT PK_exam_exam_id_key
+PRIMARY KEY (exam_id);
+
+CREATE TABLE person
+(
+	person_id int,
+	person_name varchar,
+	person_surname varchar,
+
+	CONSTRAINT PK_person_person_id_key PRIMARY KEY (person_id)
+);
+
+CREATE TABLE passport
+(
+	passport_id int,
+	serial_num int NOT NULL,
+	registration varchar,
+	person_id int,
+
+	CONSTRAINT PK_passport_passport_id_key PRIMARY KEY (passport_id),
+	CONSTRAINT FK_passport_person FOREIGN KEY (person_id) REFERENCES person(person_id)
+);
+
+ALTER TABLE book
+ADD COLUMN weight decimal CONSTRAINT CHK_book_weight CHECK (weight > 0 AND weight < 1000);
+
+CREATE TABLE student
+(
+	student_id serial,
+	full_name varchar,
+	course int DEFAULT 1
+);
+
+ALTER TABLE student
+ALTER COLUMN course DROP DEFAULT;

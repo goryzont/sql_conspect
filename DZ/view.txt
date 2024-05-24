@@ -1,0 +1,41 @@
+CREATE VIEW dz AS
+select order_date, required_date, shipped_date, ship_postal_code, company_name, contact_name, phone, last_name, first_name, title
+from orders
+join customers using (customer_id)
+join employees using (employee_id);
+
+SELECT *
+FROM dz
+WHERE order_date > '01.01.1997';
+
+CREATE OR REPLACE VIEW dz_2 AS
+select order_date, required_date, shipped_date, ship_postal_code, ship_country, company_name, contact_name, phone, last_name, first_name, title,
+customers.postal_code, employees.reports_to
+from orders
+join customers using (customer_id)
+join employees using (employee_id);
+
+SELECT *
+from dz_2
+order by ship_country;
+
+DROP VIEW dz_2;
+
+CREATE VIEW dz_3 AS
+SELECT product_id, product_name, discontinued
+FROM products
+WHERE discontinued = 0
+WITH LOCAL CHECK OPTION;
+
+SELECT *
+from dz_3;
+
+INSERT INTO dz_3
+VALUES
+(1111, 'arbuz', 0)
+
+SELECT *
+from products
+order by product_id DESC
+
+DELETE FROM products WHERE product_id = 1111

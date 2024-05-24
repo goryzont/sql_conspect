@@ -1,0 +1,149 @@
+                            DDL - управляем БД и таблицами
+DDL - Data Definition Language
+DDL это часть языка SQL которая позволяет манипулировать данными
+
+CREATE TABLE table_name - создать таблицу
+ALTER TABLE table_name - изменить таблицу:
+    ADD COLUMN column_name data_type - добавить колонку
+    RENAME TO new_table_name - переименовать таблицу
+    RENAME old_column_name TO new_column_name - переименовать столбец
+    ALTER COLUMN column_name SET DATA TYPE data_type - задать новый тип данных для столбца
+DROP TABLE table_name -  удаление таблицы полностьб
+TRUNCATE TABLE table_name - удаление всех данных внутри таблицы(не может удалить данные на которые есть ссылки
+из других таблиц)
+DROP COLUMN column name - удалить столбец
+
+-----------------------------------------PRIMARY KEY--------------------------------------------------------------------------
+
+Столбец которому мы присваеваем PRIMARY KEY должен быть уникальным и не может быть NULL
+
+В чём разница между PRIMARY KEY и UNIQUE NOT NULL:
+PRIMARY KEY на всю таблицу может быть только 1, а вот UNIQUE NOT NULL может быть наложен на несколько столбцов
+Так же PRIMARY KEY используется для того чтобы пометить первичный ключ который
+используется для связки с внешним ключом и уникально идентифицирует строку в целой таблице
+
+Пример добавления PRIMARY KEY:
+ALTER TABLE chair
+ADD constraint chair_id_pk
+PRIMARY KEY (chair_id)
+
+Команда для просмотра всех первичных ключей:
+
+Select constraint_name
+from information_schema.key_column_usage
+WHERE table_name ='chair' AND table_schema = 'public' AND column_name = 'chair_id'
+
+Команда для просмотра всех CONSTRAINT:
+SELECT *
+FROM information_schema.constraint_table_usage
+WHERE table_name = 'some_table';
+
+-----------------------------------------FOREIGN KEY--------------------------------------------------------------------------
+Создание FOREIGN KEY
+	CONSTRAINT FK_book_publisher FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
+Удаление FOREIGN KEY
+    DROP CONSTRAINT constraint_name
+---------------------------------------------CHECK----------------------------------------------------------------------------
+Логические ограничения прямо по условиям
+Пример:
+ALTER TABLE book
+ADD COLUMN price decimal CONSTRAINT CHK_book_price CHECK (price >= 0)
+
+Данная команда не даёт добавить отрицательные значения в колонку  price
+
+---------------------------------------------DEFAULT-----------------------------------------------------------------------
+Оператор SQL DEFAULT определяет значение, которым будет заполнен тот или иной столбец
+по умолчанию при создании таблицы. Данное значение будет вставляться в запись, если иное не указано.
+
+Оператор SQL DEFAULT имеет следующий синтаксис:
+
+CREATE TABLE table_name (
+column_name1 data_type(size) DEFAULT 'default_name'
+)
+
+Чтобы убрать DEFAULT:
+ALTER TABLE student
+ALTER COLUMN course DROP DEFAULT
+
+-------------------------------------------SEQUENCES--------------------------------------------------------------------
+CREATE SEQUENCE sequence_name — создать генератор последовательности
+
+CREATE SEQUENCE создаёт генератор последовательности. Эта операция включает создание и инициализацию
+специальной таблицы имя, содержащей одну строку. Владельцем генератора будет пользователь, выполняющий эту команду.
+
+SELECT nextval('seq1'); - показывает следуещее значение последовательности
+SELECT currval('seq1'); - показывает текущее значение последовательности
+SELECT lastval(); - показывает последнее значение последней используемой последовательности
+
+CREATE SEQUENCE sequence_name INCREMENT step_sequence
+
+Так же можно установить минимальное, максимальное и стартовое значение последовательности
+Пример:
+CREATE SEQUENCE seq3
+INCREMENT 16
+MINVALUE 0
+MAXVALUE 128
+START WITH 0;
+
+Для перезапуска последовательности:
+ALTER SEQUENCE sequence_name RESTART WITH any_digit;
+
+CREATE SEQUENCE IF NOT EXISTS sequence_name
+START WITH 1 OWNED BY table_name.table_column - присваиваем последовательность полю
+
+ALTER TABLE table_name
+ALTER COLUMN column name SET DEFAULT nextval('') - чтобы последовательность для этой колонки правильно работала
+
+--------------------------------------------INSERT----------------------------------------------------------------------------
+Пример вставких данных в БД:
+INSERT INTO table_name (column1, column2, column3, ...)
+VALUES (value1, value2, value3, ...);
+
+Синтаксис для создания таблички:
+SELECT *
+INTO best_author
+FROM author
+WHERE rating >= 4.5
+
+Мы можем только создать таблицу best_author, но дополнить её уже не можешь
+
+---------------------------------------UPDATE, DELETE, RETURNING------------------------------------------------------------
+(Странно тут вроде уже есть команды DML
+DML(Data Manipulation Language) - SELECT, INSERT, UPDATE, DELETE
+)
+
+Синтаксис UPDATE:
+UPDATE table_name
+SET column1 = value1, column2 = value2, ...
+WHERE condition;
+
+Примечание: Будьте осторожны при обновлении записей в таблице!
+Обратите внимание на предложение WHERE в инструкции UPDATE.
+Предложение WHERE указывает, какие записи должны быть обновлены.
+Если вы опустите предложение WHERE, то все записи в таблице будут обновлены!
+
+Инструкция DELETE
+Инструкция DELETE используется для удаления существующих записей в таблице.
+
+Синтаксис DELETE:
+DELETE FROM table_name
+WHERE condition;
+Примечание: Будьте осторожны при удалении записей в таблице!
+Обратите внимание на предложение WHERE в инструкции DELETE.
+Предложение WHERE указывает, какие записи должны быть удалены.
+Если вы опустите предложение WHERE, то все записи в таблице будут удалены!
+
+Инструкция RETURNING:
+Иногда бывает полезно получать данные из модифицируемых строк в процессе их обработки.
+Это возможно с использованием предложения RETURNING, которое можно задать для команд INSERT, UPDATE и DELETE.
+Применение RETURNING позволяет обойтись без дополнительного запроса к базе для сбора данных и это особенно ценно,
+когда как-то иначе трудно получить изменённые строки надёжным образом.
+
+Пример RETURNING:
+INSERT INTO users (firstname, lastname) VALUES ('Joe', 'Cool') RETURNING id;
+-увидим какие id добавились
+
+UPDATE products SET price = price * 1.10
+  WHERE price <= 99.99
+  RETURNING name, price AS new_price;
+-сращу увидим таблицу состоящую из name и new_price с измёненными ценами, если они удовлетворяют условию

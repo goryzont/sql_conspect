@@ -1,0 +1,24 @@
+Домашка с Joinaми
+(1)
+select customers.company_name, employees.last_name, employees.first_name
+from orders
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN customers ON orders.customer_id = customers.customer_id
+INNER JOIN shippers ON orders.ship_via = shippers.shipper_id
+WHERE customers.city = 'London' AND employees.city = 'London' AND shippers.company_name = 'Speedy Express';
+(2)
+select product_name, units_in_stock, suppliers.contact_name, suppliers.phone
+from products
+INNER JOIN categories ON products.category_id = categories.category_id
+INNER JOIN suppliers ON products.supplier_id = suppliers.supplier_id
+WHERE units_in_stock < 20 AND discontinued = 1 AND categories.category_name in ('Beverages', 'Seafood,');
+(3)
+select customers.company_name, orders.order_id
+from customers
+LEFT JOIN orders ON customers.customer_id = orders.customer_id
+WHERE orders.customer_id is NULL;
+(4)
+select customers.company_name, orders.order_id
+from orders
+RIGHT JOIN customers ON customers.customer_id = orders.customer_id
+WHERE orders.customer_id is NULL;

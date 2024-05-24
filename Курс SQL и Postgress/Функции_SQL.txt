@@ -1,0 +1,194 @@
+---------------------------------------ВВЕДЕНИЕ В ФУНКЦИИ--------------------------------------------------------------------------------
+Зачем нужны функции:
+-Функция - это объект БД, принимающий аргументы и возвращающий результат
+
+-Функции(хранимые процедуры) - компилируемы и хранятся на стороне БД. А потому их вызово стоит дёшево
+
+-Разграничение работы Frontend-dev и Server-side-dev
+
+-Хранить код который работает с кортежами логичнее ближе к данным (SRP - принцип единой ответственности)
+
+-Переиспользованность функций разными клиентскими приложениями
+
+-Управление безопасностью через доступ к функциям
+
+-Уменьшение трафика на сеть
+
+-Модульное программирование
+
+Функции в Postgres:
+-Состоят из набора утверждений, возвращая результат последнего из утверждений
+-Могут содержать SELECT, INSERT, UPDATE, DELETE (CRUD операции)
+-Не могут содержать COMMIT, SAVEPOINT(TCL); VACUUM(utility)
+
+Функции делятся на:
+-SQL-функции
+-Процедурные(PL/pgSQL - основной диалект)
+-Серверные функции(написанные на C)
+-Собственные C-функции
+
+СИНТАКСИС СОЗДАНИЯ ФУНКЦИИ:
+CREATE FUNCTION func_name([arg1,arg2,...]) RETURN data_type AS $$
+--logic
+$$ LANGUAGE lang
+
+CREATE OR REPLACE func_name... -
+модифицирует уже существующую функцию с таким наименованием
+
+----------------------------------------НАША ПЕРВАЯ ФУНКЦИЯ-------------------------------------------------------------------
+Пример функции:
+CREATE OR REPLACE FUNCTION fix_customer_region() RETURNS void AS
+$$
+UPDATE tmp_customers
+set region = 'unknown'
+WHERE region is NULL;
+$$ language SQL;
+
+select fix_customer_region();
+
+Функция заменяет все строки NULL столбце region на unknown
+
+-----------------------------------------СКАЛЯРНЫЕ ФУНКЦИИ---------------------------------------------------------------
+Пример скалярной функции:
+
+CREATE OR REPLACE FUNCTION get_total_number_of_goods() RETURNS bigint AS $$
+SELECT SUM(units_in_stock)
+FROM products
+$$ LANGUAGE SQL;
+
+SELECT get_total_number_of_goods() AS total_goods;
+
+CREATE OR REPLACE FUNCTION get_avg_price() RETURNS float8 AS $$
+SELECT AVG(unit_price)
+FROM products
+$$ LANGUAGE SQL;
+
+SELECT get_avg_price() AS avg_price;
+
+В таком случае мы не можем писать кортеж в селект, который возвращает много колонок
+иначе произойдёт ошибка
+
+-----------------------------------------ФУНКЦИИ С ПЕРЕМЕННЫМИ---------------------------------------------------------------------
+По умолчанию аргументы которые мы объяевляем внутри круглых скобок неявно помечаются как IN
+IN - входящие аргументы
+
+Кроме того можно декларировать исходящие аргументы, которые помеченые как OUT
+OUT - исходящие аргументы
+
+Так же есть
+INOUT - и входящий и исходящий аргумент(лучше такими не пользоваться)
+
+VARIADIC - массив входящих параметров
+
+Иногда полезно присваивать аргументам значение по умолчанию, это можно сделать с помощью DEFAULT
+DEFAULT value
+
+Примеры:
+CREATE OR REPLACE FUNCTION get_product_price_by_name(prod_name varchar) RETURNS real AS $$
+    SELECT unit_price
+    FROM products
+    WHERE product_name = prod_name
+$$ LANGUAGE SQL;
+
+SELECT get_product_price_by_name('Chocolade') as price;
+
+SELECT *
+FROM products
+ORDER BY product_name;
+
+CREATE OR REPLACE FUNCTION get_price_boundaries(OUT max_price real, OUT min_price real) AS $$
+    SELECT MAX(unit_price), MIN(unit_price)
+    FROM products
+$$ LANGUAGE SQL;
+
+SELECT get_price_boundaries();
+
+SELECT *
+FROM get_price_boundaries();
+
+CREATE OR REPLACE FUNCTION get_price_boundaries_by_discontinuity(is_discontinued int, OUT max_price real, OUT min_price real) AS $$
+    SELECT MAX(unit_price), MIN(unit_price)
+    FROM products
+    WHERE discontinued = is_discontinued
+$$ LANGUAGE SQL;
+
+SELECT *
+FROM get_price_boundaries_by_discontinuity(1);
+
+CREATE OR REPLACE FUNCTION get_price_boundaries_by_discontinuity_defaut(is_discontinued int DEFAULT 1, OUT max_price real, OUT min_price real) AS $$
+    SELECT MAX(unit_price), MIN(unit_price)
+    FROM products
+    WHERE discontinued = is_discontinued
+$$ LANGUAGE SQL;
+
+SELECT *
+FROM get_price_boundaries_by_discontinuity_defaut();
+
+------------------------------------ВОЗВРАТ НАБОРОВ ДАННЫХ-------------------------------------------------------------------------
+RETURN SETOF data_type - возрат n-значений типа data_type
+RETURNS SETOF table - если нужно вернуть все столбцы из таблицы или пользовательского типа
+RETURNS SETOF record (только когда типы колонок заранее неизвестны) #лучше не использовать без необходимости
+RETURNS TABLE (column_name data_type) - тоже что и SETOF table, но имеем возможность явно указать
+возвращаемые столбцы
+Возврат через OUT параметры
+
+CREATE OR REPLACE FUNCTION get_average_prices_by_prod_categories()
+        RETURNS SETOF double precision AS $$
+    SELECT AVG(unit_price)
+    FROM products
+    GROUP BY category_id
+$$ LANGUAGE SQL;
+
+SELECT *
+FROM get_average_prices_by_prod_categories() AS average_prices;
+
+SELECT *
+FROM products
+
+CREATE OR REPLACE FUNCTION get_sum_avg_prices_by_prod_categories(OUT sum_price real, OUT avg_price float8)
+        RETURNS SETOF RECORD AS $$
+    SELECT SUM(unit_price), AVG(unit_price)
+    FROM products
+    GROUP BY category_id
+$$ LANGUAGE SQL;
+
+SELECT sum_price, avg_price
+FROM get_sum_avg_prices_by_prod_categories()
+
+SELECT sum_price AS sum_of, avg_price AS in_avg
+FROM get_sum_avg_prices_by_prod_categories()
+
+-- Deprecated:
+CREATE OR REPLACE FUNCTION get_sum_avg_prices_by_prod_categories_depr()
+        RETURNS SETOF RECORD AS $$
+    SELECT SUM(unit_price), AVG(unit_price)
+    FROM products
+    GROUP BY category_id
+$$ LANGUAGE SQL;
+
+SELECT *
+FROM get_sum_avg_prices_by_prod_categories_depr() AS (sum_price real, avg_price float8)
+
+CREATE OR REPLACE FUNCTION get_customers_by_country(customer_country varchar)
+        RETURNS TABLE(char_code char, company_name varchar) AS $$
+    SELECT customer_id, company_name
+    FROM customers
+    WHERE country = customer_country
+$$ LANGUAGE SQL;
+
+SELECT * FROM get_customers_by_country('USA');
+SELECT company_name FROM get_customers_by_country('USA');
+SELECT char_code, company_name FROM get_customers_by_country('USA');
+
+CREATE OR REPLACE FUNCTION get_customers_by_country_table(customer_country varchar)
+        RETURNS SETOF customers AS $$
+
+    -- won't work SELECT company_name contact_name
+    SELECT *
+    FROM customers
+    WHERE country = customer_country
+$$ LANGUAGE SQL;
+
+SELECT * FROM get_customers_by_country_table('USA');
+SELECT company_name FROM get_customers_by_country_table('USA');
+SELECT customer_id, company_name FROM get_customers_by_country_table('USA');

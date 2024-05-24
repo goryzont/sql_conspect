@@ -1,0 +1,36 @@
+CREATE TABLE teacher
+(
+    teacher_id serial,
+    first_name varchar,
+    last_name varchar,
+    birthday date,
+    phone varchar,
+    title varchar
+)
+
+ALTER TABLE teacher
+CREATE COLUMN middle_name varchar
+
+ALTER TABLE teacher
+DROP COLUMN middle_name
+
+ALTER TABLE teacher
+RENAME birthday TO birth_date
+
+ALTER TABLE teacher
+ALTER COLUMN phone SET DATA TYPE varchar(32)
+
+CREATE TABLE exam (
+    exam_id serial,
+    exam_name varchar(64)
+)
+
+
+INSERT INTO exam (exam_name)
+values ('русский'),
+('английский'),
+('математика')
+
+
+
+TRUNCATE TABLE exam RESTART IDENTITY

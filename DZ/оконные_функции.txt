@@ -1,0 +1,13 @@
+Вывести отчёт показывающий по сотрудникам суммы продаж SUM(unit_price*quantity), и сопоставляющий их со
+средним значением суммы продаж по сотрудникам (AVG по SUM(unit_price*quantity)) сортированный
+по сумме продаж по убыванию.
+
+Вывести ранг сотрудников по их зарплате, без пропусков. Также вывести имя, фамилию и должность.
+
+
+SELECT DISTINCT employee_id, total_by_emp, AVG(total_by_emp) OVER() as avg_price
+FROM (SELECT employee_id, sum(unit_price*quantity) OVER(PARTITION BY employee_id) as total_by_emp
+	FROM orders
+	LEFT JOIN order_details USING(order_id)) q
+ORDER BY total_by_emp;
+(Дз выполнено не точно, потому что не совсем понятно что хотели от нас)

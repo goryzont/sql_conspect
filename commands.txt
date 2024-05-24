@@ -1,0 +1,40 @@
+CREATE имя БД -создание БД
+(Если использовать терминальный клиент psql то CREATE DATABASE)
+DROP DATABASE  имя БД - удаление БД
+
+CREATE TABLE имя таблицы -  создание таблицы
+DROP TABLE имя таблицы - удаление таблицы
+
+PRIMARY KEY - для того чтобы у каждой строки был индетификатор
+
+INSERT INTO имя таблицы - вставить в таблицу
+VALUES - значения
+()
+
+Примеры написаны на основе тренировочной БД northwind:
+
+SELECT * - выбрать всё
+FROM - из (откуда выбрать) (SELECT * FROM table)
+DISTINCT - позволяет выводить уникальные строки (SELECT DISTINCT city FROM employees)
+COUNT - подсчёт кол-ва строк выведеных (SELECT COUNT(DISTINCT country) FROM employees),(выведет кол-во уникальных стран где есть работники)
+WHERE - Ставит условие(=,>,>=,<,<=,!= or <>) при выборе данных(SELECT * FROM table WHERE condition)
+AND - логическое И (SELECT * FROM table WHERE condition1 AND condition2)
+OR - логическое ИЛИ (SELECT * FROM table WHERE condition1 OR condition2)
+BETWEEN - SELECT * FROM orders WHERE freight BETWEEN 20 AND 40;(предпологается нестрогое неравенство)
+IN (NOT IN) - SELECT * FROM customers WHERE country IN ('Mexico', 'Germany', 'USA', 'Canada')
+ORDER BY - сортировка в порядке возрастания(ASC) или убывания(DESC) (SELECT column FROM table WHERE condition ORDER BY column ASC)
+MIN - Вычисление минимального значения (SELECT MIN(order_date) FROM orders WHERE ship_city = 'London')
+MAX - Вычисление максимального значения(SELECT MAX(order_date) FROM orders WHERE ship_city = 'London')
+AVG - Вычисление среднего значения(SELECT AVG(unit_price) FROM products WHERE discontinued != 1;)
+SUM - Позволяет вычислить сумму(SELECT SUM(units_in_stock) FROM products WHERE discontinued !=1;)
+LIKE - для того чтобы искать строки похожие на заданный шаблон(SELECT last_name, first_name FROM employees WHERE first_name LIKE '%n')
+LIMIT - Обозначает кол-во записей которые мы хотим получить(SELECT product_name, unit_price FROM products LIMIT 10)
+IS (NOT) NULL - проверяет отсутсвие значения(SELECT ship_city, ship_region, ship_country FROM orders WHERE ship_region IS NULL)
+GROUP BY - группировка (SELECT ship_country, COUNT (*) FROM orders WHERE freight > 50 GROUP BY ship_country ORDER BY COUNT(*) DESC)
+HAVING - Фильтр для GROUP BY(SELECT category_id, SUM(unit_price * units_in_stock FROM products WHERE discontinued != 1 GROUP BY category_id HAVING SUM(unit_price * units_in_stock) > 5000 ORDER BY SUM(unit_price * units_in_stock)))
+UNION -  объединение множеств (SELECT country FROM customers UNION SELECT country FROM employees)
+INTERSECT - пересечение множеств (SELECT country FROM customers INTERSECT SELECT country FROM employees)
+EXCEPT - разница множеств ((SELECT country FROM customers EXCEPT SELECT country FROM employees))
+RIGHT - берёт количество символо справа у выбранной строки(SELECT name FROM students WHERE marks > 75 ORDER BY RIGHT(name, 3))
+DIV - деление без остатка (SELECT country.continent, SUM(city.population) DIV COUNT(city.population) AS avg_pop FROM city JOIN country ON city.countrycode = country.code) )
+INNER JOIN - читать JOIN.txt (SELECT product_name, suppliers.company_name, units_in_stock FROM products INNER JOIN suppliers ON products.supplier_id = suppliers.supplier_id)
