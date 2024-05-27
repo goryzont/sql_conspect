@@ -19,7 +19,7 @@
 Функции в Postgres:
 -Состоят из набора утверждений, возвращая результат последнего из утверждений
 -Могут содержать SELECT, INSERT, UPDATE, DELETE (CRUD операции)
--Не могут содержать COMMIT, SAVEPOINT(TCL); VACUUM(utility)
+-Не могут содержать SAVEPOINT(TCL); VACUUM(utility)
 
 Функции делятся на:
 -SQL-функции
