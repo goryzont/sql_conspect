@@ -1,0 +1,7 @@
+Есть таблица сотрудников employees. Мы хотим для каждого сотрудника увидеть, на сколько его зарплата
+больше по сравнению с его коллегой идущим следующим в рейтинге зарплат в каждом из городов.
+Для сотрудника с самой низкой ЗП установить разницу - 0.
+
+SELECT id, name, departemnt, city, salary, LEAD(salary) OVER(partition by city order by city, salary) - salary as difference
+from employees
+ORDER BY  city, salary

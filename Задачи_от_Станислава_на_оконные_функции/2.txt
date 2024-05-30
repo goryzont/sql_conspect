@@ -1,0 +1,12 @@
+Есть таблица сотрудников employees. В компании работают сотрудники из Москвы и Самары.
+Мы хотим разбить их на две группы по зарплате в каждом из городов
+(Не до конца понимаю задачу)
+
+SELECT *, ntile(2) OVER(ORDER BY salary ) as salary_city
+from employees
+WHERE city = 'Москва'
+UNION ALL
+SELECT *, ntile(2) OVER(ORDER BY salary ) as salary_city
+from employees
+WHERE city = 'Самара'
+ORDER BY city

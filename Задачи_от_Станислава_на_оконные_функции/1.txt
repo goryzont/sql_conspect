@@ -1,0 +1,12 @@
+Есть таблица сотрудников employees. Мы хотим узнать самых высокооплачиваемых людей по каждому департаменту
+
+WITH help AS
+(
+SELECT id, name, departemnt, salary, RANK() OVER(PARTITION BY departemnt ORDER BY salary DESC) as max_salary
+from employees
+)
+
+SELECT id, name, departemnt, salary
+from help
+where max_salary = 1
+ORDER BY salary

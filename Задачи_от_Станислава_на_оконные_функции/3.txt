@@ -1,0 +1,15 @@
+Есть таблица сотрудников employees. Мы хотим для каждого сотрудника увидеть,
+сколько процентов составляет его зарплата от максимальной в городе
+
+Решение без оконной функции:
+WITH help AS
+(
+select city, max(salary) as max_salary_in_city
+from employees
+group by city
+)
+
+SELECT id, name, departemnt, e.city, (salary*100)/max_salary_in_city||'%' as procent_from_max_salary
+from employees e
+left join help h ON h.city = e.city
+WHERE e.city = h.city

@@ -1,0 +1,7 @@
+Есть таблица доходов-расходов expenses. Мы хотим рассчитать скользящее среднее по расходам за последние три месяца
+и накопительную сумму в рамках года.
+
+select income, expense, make_date(year, month, '01') as column_date,
+	round(avg(expense) OVER(ORDER BY make_date(year, month, '01') rows between 1 preceding and 1 following)) as roll_avg,
+	sum(income) OVER(ORDER BY make_date(year, month, '01') rows between unbounded preceding and current row ) as income_sum
+from expenses
