@@ -78,6 +78,13 @@ FROM products
 ORDER BY unit_price;
 
 
+ntile
+SELECT pi.product_id,
+       sum (pi.count) AS count_total,
+       ntile(3) over (ORDER BY sum(pi.count) desc)
+  FROM purchase_item pi
+ GROUP BY pi.product_id
+
 --------------------------------------------ВОЗВРАТ N-записей-------------------------------------------------------------------
 SELECT *
 FROM products
